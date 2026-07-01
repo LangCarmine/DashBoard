@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor del Aspersor · Panel Técnico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: #d9d2c5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            color: #2c241b;
+        }
+
+        .dashboard {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .encabezado {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #b8a99a;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .encabezado h1 {
+            font-size: 30px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #2c241b;
+            margin: 0;
+        }
+
+        .encabezado-derecha {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .badge-hora {
+            background: #f2ede5;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #4d4035;
+            border: 1px solid #b8a99a;
+            box-shadow: 0 2px 8px rgba(60, 50, 40, 0.06);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .selector-robot {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f2ede5;
+            padding: 4px 8px 4px 16px;
+            border-radius: 40px;
+            border: 1px solid #b8a99a;
+        }
+
+        .selector-robot label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #4d4035;
+        }
+
+        .selector-robot input {
+            background: #eae3d8;
+            border: 1px solid #b8a99a;
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #2c241b;
+            width: 130px;
+            outline: none;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .selector-robot input:focus {
+            border-color: #5f8b4b;
+            box-shadow: 0 0 0 3px rgba(95, 139, 75, 0.15);
+            background: #f2ede5;
+        }
+
+        .selector-robot input::placeholder {
+            color: #8a7d6e;
+            font-weight: 400;
+        }
+
+        .btn-conectar {
+            background: #5f8b4b;
+            border: none;
+            border-radius: 30px;
+            padding: 6px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #f2ede5;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-conectar:hover {
+            background: #4d753b;
+            transform: scale(1.02);
+        }
+
+        .btn-conectar:active {
+            transform: scale(0.98);
+        }
+
+        .btn-reiniciar {
+            background: #eae3d8;
+            border: 1px solid #b8a99a;
+            border-radius: 40px;
+            padding: 6px 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #4d4035;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(60, 50, 40, 0.06);
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-reiniciar:hover {
+            background: #d6cec2;
+            border-color: #a89888;
+            box-shadow: 0 4px 12px rgba(60, 50, 40, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .btn-reiniciar:active {
+            transform: translateY(0px);
+            background: #cbc2b5;
+        }
+
+        .contenedor-principal {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 28px;
+        }
+
+        .panel-izquierdo {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .tarjeta {
+            background: #f2ede5;
+            border-radius: 28px;
+            padding: 28px 30px;
+            border: 1px solid #d6cec2;
+            box-shadow: 0 20px 40px -12px rgba(60, 50, 40, 0.12), 0 4px 18px rgba(0, 0, 0, 0.02);
+            transition: box-shadow 0.2s ease;
+        }
+
+        .tarjeta:hover {
+            box-shadow: 0 28px 48px -16px rgba(60, 50, 40, 0.18);
+        }
+
+        .tarjeta-destacada {
+            background: #eae3d8;
+            border-left: 6px solid #5f8b4b;
+            border-radius: 28px;
+        }
+
+        .etiqueta {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: #6b5f52;
+            background: rgba(95, 139, 75, 0.08);
+            padding: 4px 14px;
+            border-radius: 40px;
+            margin-bottom: 14px;
+        }
+
+        .valor-estado {
+            font-size: 44px;
+            font-weight: 650;
+            color: #2c241b;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .indicador-estado {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #5f8b4b;
+            animation: pulso 1.8s infinite;
+        }
+
+        .indicador-inactivo {
+            background: #b14a4a !important;
+        }
+
+        @keyframes pulso {
+            0% { opacity: 0.5; transform: scale(0.92); }
+            50% { opacity: 1; transform: scale(1.08); }
+            100% { opacity: 0.5; transform: scale(0.92); }
+        }
+
+        .panel-metricas {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+        }
+
+        .tarjeta-metrica {
+            background: #f2ede5;
+            border-radius: 24px;
+            padding: 22px 24px;
+            border: 1px solid #d6cec2;
+            box-shadow: 0 12px 24px -12px rgba(60, 50, 40, 0.06);
+        }
+
+        .valor-metrica {
+            font-size: 36px;
+            font-weight: 650;
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+
+        .valor-metrica.verde { color: #5f8b4b; }
+        .valor-metrica.azul { color: #6b7f8a; }
+        .valor-metrica.naranja { color: #b87a3a; }
+        .valor-metrica.rojo { color: #b14a4a; }
+
+        .contenedor-barra {
+            width: 100%;
+            height: 10px;
+            background: #d6cec2;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-top: 8px;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .relleno-barra {
+            height: 100%;
+            border-radius: 20px;
+            background: linear-gradient(90deg, #7aa85e, #5f8b4b);
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .relleno-azul {
+            background: linear-gradient(90deg, #8a9fa8, #6b7f8a);
+        }
+
+        .panel-derecho .tarjeta {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #f2ede5;
+            border-radius: 28px;
+            padding: 28px 24px;
+        }
+
+        .lista-humedad {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .lista-humedad li {
+            padding: 14px 16px;
+            border-radius: 16px;
+            font-size: 13px;
+            line-height: 1.5;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid #d6cec2;
+            transition: all 0.15s;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .item-reciente {
+            background: #e6ddd0 !important;
+            border-left: 5px solid #5f8b4b !important;
+            font-weight: 500;
+            color: #2c241b;
+            box-shadow: 0 4px 12px rgba(60, 50, 40, 0.06);
+        }
+
+        .item-antiguo {
+            color: #6b5f52;
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-left: 3px solid rgba(95, 139, 75, 0.2);
+        }
+
+        .item-antiguo:last-child {
+            opacity: 0.7;
+        }
+
+        .panel-extra {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin-top: 4px;
+        }
+
+        .extra-item {
+            background: #f2ede5;
+            border-radius: 16px;
+            padding: 12px 14px;
+            text-align: center;
+            border: 1px solid #d6cec2;
+            transition: all 0.2s ease;
+        }
+
+        .extra-item .valor {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2c241b;
+        }
+
+        .extra-item .nombre {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: #6b5f52;
+            margin-top: 2px;
+        }
+
+        .mensaje-reinicio {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: #2c241b;
+            color: #f2ede5;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+            opacity: 0;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .mensaje-reinicio.visible {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 820px) {
+            .contenedor-principal {
+                grid-template-columns: 1fr;
+                gap: 28px;
+            }
+            .panel-metricas {
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            .panel-extra {
+                grid-template-columns: 1fr 1fr 1fr;
+            }
+            .encabezado h1 {
+                font-size: 24px;
+            }
+            .encabezado-derecha {
+                gap: 10px;
+            }
+            .selector-robot input {
+                width: 100px;
+                font-size: 12px;
+                padding: 4px 10px;
+            }
+            .btn-reiniciar {
+                padding: 5px 14px;
+                font-size: 12px;
+            }
+            .btn-conectar {
+                padding: 4px 14px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .panel-metricas {
+                grid-template-columns: 1fr;
+            }
+            .panel-extra {
+                grid-template-columns: 1fr 1fr;
+            }
+            .tarjeta {
+                padding: 22px 18px;
+            }
+            .valor-estado {
+                font-size: 32px;
+            }
+            .encabezado {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .encabezado-derecha {
+                justify-content: flex-start;
+                margin-top: 4px;
+                flex-wrap: wrap;
+            }
+            .selector-robot {
+                padding: 4px 8px 4px 12px;
+            }
+            .selector-robot input {
+                width: 80px;
+                font-size: 11px;
+            }
+        }
+
+        #humedad {
+            font-size: 14px;
+            color: #6b5f52;
+        }
+    </style>
+</head>
+<body>
+
+<div class="mensaje-reinicio" id="mensajeReinicio">Datos reiniciados correctamente</div>
+
+<div class="dashboard">
+    <div class="encabezado">
+        <h1>Monitor del Aspersor</h1>
+        <div class="encabezado-derecha">
+            <div class="selector-robot">
+                <label for="robotId">Robot ID:</label>
+                <input type="text" id="robotId" placeholder="robot_01" value="robot_01">
+                <button class="btn-conectar" id="btnConectar">Conectar</button>
+            </div>
+            <span class="badge-hora" id="reloj">--:--:--</span>
+            <button class="btn-reiniciar" id="btnReiniciar">
+                <span class="icono">⟳</span> Reiniciar
+            </button>
+        </div>
+    </div>
+
+    <div class="contenedor-principal">
+        <div class="panel-izquierdo">
+            <div class="tarjeta tarjeta-destacada">
+                <span class="etiqueta">estado del robot</span>
+                <div class="valor-estado">
+                    <span class="indicador-estado" id="indicador"></span>
+                    <span id="estado">--</span>
+                </div>
+            </div>
+
+            <div class="panel-metricas">
+                <div class="tarjeta-metrica">
+                    <span class="etiqueta">bateria</span>
+                    <div class="valor-metrica verde" id="bateria">--%</div>
+                    <div class="contenedor-barra">
+                        <div class="relleno-barra" id="barra-bateria" style="width:0%"></div>
+                    </div>
+                </div>
+                <div class="tarjeta-metrica">
+                    <span class="etiqueta">nivel de agua</span>
+                    <div class="valor-metrica azul" id="agua">--%</div>
+                    <div class="contenedor-barra">
+                        <div class="relleno-barra relleno-azul" id="barra-agua" style="width:0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-extra">
+                <div class="extra-item">
+                    <div class="valor" id="zonas-regadas">0</div>
+                    <div class="nombre">zonas regadas</div>
+                </div>
+                <div class="extra-item">
+                    <div class="valor" id="riegos-omitidos">0</div>
+                    <div class="nombre">riegos omitidos</div>
+                </div>
+                <div class="extra-item">
+                    <div class="valor" id="humedad-actual">--%</div>
+                    <div class="nombre">humedad actual</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel-derecho">
+            <div class="tarjeta">
+                <span class="etiqueta">historial de humedad</span>
+                <div id="humedad" style="flex:1; display:flex; align-items:center; justify-content:center; color:#6b5f52; font-weight:400;">
+                    cargando...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        let robotIdActual = 'robot_01';
+        let historial = [];
+        let ultimaLectura = "";
+        let contadorRiegos = 0;
+        let contadorOmitidos = 0;
+        let ultimoEstado = "";
+        let intervaloDatos = null;
+
+        const mensajeReinicio = document.getElementById('mensajeReinicio');
+        const inputRobotId = document.getElementById('robotId');
+        const btnConectar = document.getElementById('btnConectar');
+
+        function getUrl() {
+            return `https://databa-a3cfe-default-rtdb.firebaseio.com/aspersores/${robotIdActual}.json`;
+        }
+
+        function actualizarReloj() {
+            const ahora = new Date();
+            const h = String(ahora.getHours()).padStart(2, '0');
+            const m = String(ahora.getMinutes()).padStart(2, '0');
+            const s = String(ahora.getSeconds()).padStart(2, '0');
+            document.getElementById('reloj').innerHTML = h + ':' + m + ':' + s;
+        }
+        actualizarReloj();
+        setInterval(actualizarReloj, 1000);
+
+        function mostrarMensaje(texto) {
+            mensajeReinicio.textContent = texto || 'Datos reiniciados correctamente';
+            mensajeReinicio.classList.add('visible');
+            clearTimeout(mensajeReinicio._timeout);
+            mensajeReinicio._timeout = setTimeout(() => {
+                mensajeReinicio.classList.remove('visible');
+            }, 2500);
+        }
+
+        function reiniciarDatos() {
+            contadorRiegos = 0;
+            contadorOmitidos = 0;
+            ultimoEstado = "";
+            ultimaLectura = "";
+            historial = [];
+
+            document.getElementById('zonas-regadas').innerText = '0';
+            document.getElementById('riegos-omitidos').innerText = '0';
+            document.getElementById('humedad-actual').innerHTML = '--%';
+            document.getElementById('humedad-actual').style.color = '#2c241b';
+
+            document.getElementById('humedad').innerHTML = `
+                <div style="display:flex; align-items:center; justify-content:center; color:#6b5f52; font-weight:400; width:100%; height:100%;">
+                    datos reiniciados
+                </div>
+            `;
+
+            const indicador = document.getElementById('indicador');
+            indicador.className = 'indicador-estado indicador-inactivo';
+            document.getElementById('estado').innerText = '--';
+
+            document.getElementById('bateria').innerText = '--%';
+            document.getElementById('barra-bateria').style.width = '0%';
+            document.getElementById('agua').innerText = '--%';
+            document.getElementById('barra-agua').style.width = '0%';
+
+            mostrarMensaje('Datos reiniciados correctamente');
+
+            setTimeout(() => {
+                obtenerDatos();
+            }, 300);
+        }
+
+        async function obtenerDatos() {
+            try {
+                const url = getUrl();
+                const respuesta = await fetch(url);
+                
+                if (!respuesta.ok) {
+                    if (respuesta.status === 404) {
+                        document.getElementById('humedad').innerHTML = `
+                            <div style="display:flex; align-items:center; justify-content:center; color:#b14a4a; font-weight:400; text-align:center; flex-direction:column; gap:4px;">
+                                <span style="font-size:18px;">Robot no encontrado</span>
+                                <span style="font-size:13px; color:#6b5f52;">ID: "${robotIdActual}" no existe en la base de datos</span>
+                            </div>
+                        `;
+                        document.getElementById('estado').innerText = 'No existe';
+                        const indicador = document.getElementById('indicador');
+                        indicador.className = 'indicador-estado indicador-inactivo';
+                    }
+                    return;
+                }
+
+                const datos = await respuesta.json();
+
+                if (!datos) return;
+
+                const bat = Math.min(100, Math.max(0, Math.round(datos.bateria || 0)));
+                const agua = Math.min(100, Math.max(0, Math.round(datos.agua || 0)));
+
+                document.getElementById('bateria').innerText = bat + '%';
+                document.getElementById('barra-bateria').style.width = bat + '%';
+
+                document.getElementById('agua').innerText = agua + '%';
+                document.getElementById('barra-agua').style.width = agua + '%';
+
+                const estadoTexto = datos.estado || 'inactivo';
+                document.getElementById('estado').innerText = estadoTexto;
+
+                const indicador = document.getElementById('indicador');
+                if (estadoTexto.toLowerCase().includes('regando') || estadoTexto.toLowerCase().includes('analizando')) {
+                    indicador.className = 'indicador-estado';
+                } else {
+                    indicador.className = 'indicador-estado indicador-inactivo';
+                }
+
+                // Contadores desde Firebase
+                if (datos.zonasRegadas !== undefined) {
+                    contadorRiegos = datos.zonasRegadas;
+                }
+                if (datos.riegosOmitidos !== undefined) {
+                    contadorOmitidos = datos.riegosOmitidos;
+                }
+
+                document.getElementById('zonas-regadas').innerText = contadorRiegos;
+                document.getElementById('riegos-omitidos').innerText = contadorOmitidos;
+
+                let humedadActual = '--%';
+                const raw = datos.humedad || '';
+
+                const matchNumero = raw.match(/Ahora:\s*([\d.]+)/i);
+                if (matchNumero) {
+                    const valor = Math.round(parseFloat(matchNumero[1]));
+                    humedadActual = valor + '%';
+
+                    const elem = document.getElementById('humedad-actual');
+                    if (valor < 30) {
+                        elem.style.color = '#b14a4a';
+                    } else if (valor < 60) {
+                        elem.style.color = '#b87a3a';
+                    } else {
+                        elem.style.color = '#5f8b4b';
+                    }
+                } else {
+                    humedadActual = raw.substring(0, 12) + (raw.length > 12 ? '...' : '');
+                }
+
+                document.getElementById('humedad-actual').innerHTML = humedadActual;
+
+                let textoHumedad = datos.humedad || '';
+                if (textoHumedad && textoHumedad !== ultimaLectura) {
+                    ultimaLectura = textoHumedad;
+
+                    let textoFormateado = textoHumedad;
+                    if (textoHumedad.includes('Antes') && textoHumedad.includes('Ahora')) {
+                        let limpio = textoHumedad.replace(/humedad:\s*/i, '');
+                        let antes = limpio.match(/Antes:\s*([\d.]+)/i);
+                        let ahora = limpio.match(/Ahora:\s*([\d.]+)/i);
+                        if (antes && ahora) {
+                            const antesVal = Math.round(parseFloat(antes[1]));
+                            const ahoraVal = Math.round(parseFloat(ahora[1]));
+                            const cambio = ahoraVal - antesVal;
+                            const simbolo = cambio > 0 ? '↑' : (cambio < 0 ? '↓' : '→');
+                            textoFormateado = `${antesVal}% → ${ahoraVal}% ${simbolo} (${cambio > 0 ? '+' : ''}${cambio}%)`;
+                        }
+                    } else {
+                        textoFormateado = textoHumedad;
+                    }
+
+                    historial.unshift(textoFormateado);
+                    if (historial.length > 6) historial.pop();
+
+                    let htmlLista = '<ul class="lista-humedad">';
+                    historial.forEach((item, index) => {
+                        const clase = index === 0 ? 'item-reciente' : 'item-antiguo';
+                        htmlLista += '<li class="' + clase + '">' + item + '</li>';
+                    });
+                    htmlLista += '</ul>';
+                    document.getElementById('humedad').innerHTML = htmlLista;
+                }
+            } catch (error) {
+                console.warn('Error en la conexión con Firebase:', error);
+                document.getElementById('humedad').innerHTML = 'Reintentando conexión...';
+            }
+        }
+
+        function cambiarRobot() {
+            const nuevoId = inputRobotId.value.trim();
+            if (!nuevoId) {
+                mostrarMensaje('Ingresa un ID de robot válido');
+                return;
+            }
+            robotIdActual = nuevoId;
+            historial = [];
+            ultimaLectura = "";
+            ultimoEstado = "";
+            mostrarMensaje(`Conectando a robot: ${robotIdActual}`);
+            obtenerDatos();
+        }
+
+        // Eventos
+        document.getElementById('btnReiniciar').addEventListener('click', reiniciarDatos);
+        btnConectar.addEventListener('click', cambiarRobot);
+
+        inputRobotId.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                cambiarRobot();
+            }
+        });
+
+        // Guardar el ID en localStorage
+        const idGuardado = localStorage.getItem('robotId');
+        if (idGuardado) {
+            inputRobotId.value = idGuardado;
+            robotIdActual = idGuardado;
+        }
+
+        // Al cambiar de robot, guardar en localStorage
+        const guardarId = () => {
+            localStorage.setItem('robotId', robotIdActual);
+        };
+
+        // Iniciar
+        obtenerDatos();
+        intervaloDatos = setInterval(obtenerDatos, 1000);
+
+        // Guardar ID al cambiar
+        setInterval(guardarId, 5000);
+    })();
+</script>
+
+</body>
+</html>
